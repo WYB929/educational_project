@@ -16,6 +16,7 @@ export default async function (req, res) {
   }
 
   const animal = req.body.animal || '';
+  const group = req.body.group || '';
 
   if (animal.trim().length === 0) {
     res.status(400).json({
@@ -29,7 +30,7 @@ export default async function (req, res) {
   try {
     const completion_1 = await openai.createCompletion({
       model: "gpt-3.5-turbo-instruct",
-      prompt: generatePrompt_1(animal),
+      prompt: generatePrompt_1(animal, group),
       temperature: 0.6,
       max_tokens: 2000,
     });
@@ -83,8 +84,14 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt_1(animal) {
-  return `In Computer Science, ${animal}? If sample code is required, wrap only python code with <code> </code>. `;
+function generatePrompt_1(animal, group) {
+  console.log(group);
+  if (group==0) {
+    return `In Computer Science, ${animal}?`;
+  }
+  else {
+    return `Given question ${animal}, write corresponding python code in <code> </code>.`;
+  }
 }
 
 function generatePrompt_2(animal) {

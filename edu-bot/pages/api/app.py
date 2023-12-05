@@ -46,10 +46,8 @@ def improve_code():
 @app.route('/detect', methods=['POST'])
 @cross_origin()
 def detect():
-    print(request.json['animal'])
     label = predict_question(request.json['animal'])
-    print(label)
-    return jsonify({'data': label})
+    return jsonify({'label': label})
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)

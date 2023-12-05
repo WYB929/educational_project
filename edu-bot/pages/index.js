@@ -14,7 +14,6 @@ export default function Home() {
   const [userCode, setUserCode] = useState("# Enter your code here");
   const [more_q, setMore_Q] = useState();
 
-  const [group, setGroup] = useState("")
   function detect() {
     event.preventDefault();
     fetch('http://localhost:8000/detect', {
@@ -25,21 +24,23 @@ export default function Home() {
       body: JSON.stringify({ animal: animalInput}),
     })
     .then(response => response.json())
-    .then(data => {console.log(data);})
+    .then(data => {
+      console.log(data.label);
+      // setGroup(data.label);
+      onSubmit(data.label);})
     .catch((error) => {
       console.error('Error:', error);
     });
   }
 
-  async function onSubmit(event) {
-    event.preventDefault();
+  async function onSubmit(group) {
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ animal: animalInput}),
+        body: JSON.stringify({ animal: animalInput, group: group}),
       });
 
       const data = await response.json();
@@ -47,39 +48,18 @@ export default function Home() {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }
 
-      var keys = data.result_4.replace('\n','').split(', ');
-  
-      var htmlRegexG = /<code>((.*?(\n)?)+)<\/code>/g;
-      const code_match = data.result_1.match(htmlRegexG);
-
-      var temp = data.result_1.replaceAll(htmlRegexG,'');
-      var i;
-      for (i=0; i<keys.length; i++) {
-        temp = temp.replaceAll(keys[i], "KEY"+i.toString());
+      console.log(group);
+      if (group==0) {
+        console.log(data.result_1);
+        setUserCode("# Enter your code here\n");
+        setResult(data.result_1.split(' '));
       }
-      temp = temp.split(' ');
-      console.log(temp);
-      for (i=0; i<temp.length; i++) {
-        let index = temp[i].match(/KEY(\d+)/g);
-        if (index!=null) {
-          temp[i] = keys[Number(index[0].replaceAll('KEY',''))];
-        }
-      }
-      setResult(temp);
-
-      const codeContent = code_match[0].replaceAll('<code>', '').replaceAll('</code>', '').replace('\n', '');
-      if (code_match!=null) {
-        // fs.writeFile('code.py', data, (err) => {
-        //   if (err) {
-        //       console.error('There was an error writing the file!', err);
-        //   } else {
-        //       console.log('File written successfully!');
-        //   }
-        // });
-
+      else {
+        const codeContent = data.result_1.replaceAll('<code>', '').replaceAll('</code>', '').replace('\n', '');
+        console.log(codeContent);
+        setResult("");
         setUserCode(codeContent);
       }
-
       setMore_Q(data.result_2);
       setAnimalInput("");
       setKeyDef("");
@@ -284,7 +264,7 @@ export default function Home() {
       <main className={styles.main}>
         <img src="/artificial-intelligence.png" className={styles.icon} />
         <h3>Question</h3>
-        <form onSubmit={(e)=>{detect(e); onSubmit(e);}}>
+        <form onSubmit={(e)=>{detect(e);}}>
           <input
             type="text"
             name="animal"
