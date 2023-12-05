@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS, cross_origin
-from util import check_code_quality
+from util import check_code_quality, predict_question
 
 app = Flask(__name__)
 CORS(app)
@@ -47,7 +47,9 @@ def improve_code():
 @cross_origin()
 def detect():
     print(request.json['animal'])
-    return jsonify({'data': 'hello'})
+    label = predict_question(request.json['animal'])
+    print(label)
+    return jsonify({'data': label})
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
