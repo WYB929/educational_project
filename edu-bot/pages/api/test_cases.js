@@ -14,17 +14,17 @@ export default async function (req, res) {
     });
     return;
   }
-  const key = req.body.key || '';
   const question = req.body.question || '';
 
   try {
+    console.log(question);
     const completion_3 = await openai.createCompletion({
       model: "gpt-3.5-turbo-instruct",
-      prompt: generatePrompt(key, question),
+      prompt: generatePrompt(question),
       temperature: 0.6,
       max_tokens: 100,
     });
-    console.log("completion_3");
+    console.log("test_cases");
     console.log(completion_3.data);
     
     res.status(200).json({result_3: completion_3.data.choices[0].text});
@@ -43,6 +43,9 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(animal, question) {
-  return `Give definition of ${animal} in computer science in less than three sentences.`;
+function generatePrompt(code) {
+    return `Write a few lines of python assert test code for the following function, show code only.
+    \`\`\`
+    ${code}
+    \`\`\``;
 }

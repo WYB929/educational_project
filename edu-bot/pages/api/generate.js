@@ -20,7 +20,7 @@ export default async function (req, res) {
   if (animal.trim().length === 0) {
     res.status(400).json({
       error: {
-        message: "Please enter a valid animal",
+        message: "Please enter a valid question.",
       }
     });
     return;
@@ -31,7 +31,7 @@ export default async function (req, res) {
       model: "gpt-3.5-turbo-instruct",
       prompt: generatePrompt_1(animal),
       temperature: 0.6,
-      max_tokens: 500,
+      max_tokens: 2000,
     });
     console.log("completion_1");
     console.log(completion_1.data);
@@ -49,13 +49,25 @@ export default async function (req, res) {
       model: "gpt-3.5-turbo-instruct",
       prompt: generatePrompt_2(animal),
       temperature: 0.6,
-      max_tokens: 300,
+      max_tokens: 2000,
     });
     console.log("completion_2");
     console.log(completion_2.data);
 
+    const answer = completion_2.data.choices[0].text;
+    const completion_4 = await openai.createCompletion({
+      model: "gpt-3.5-turbo-instruct",
+      prompt: generatePrompt_4(answer),
+      temperature: 0.6,
+      max_tokens: 2000,
+    });
+    console.log("completion_4");
+    console.log(completion_4.data);
+
     res.status(200).json({ result_1: completion_1.data.choices[0].text,
-    result_2: completion_2.data.choices[0].text.split("\n").slice(1)});
+    result_2: completion_2.data.choices[0].text.split("\n").slice(1),
+    result_4: completion_4.data.choices[0].text,
+  });
   } catch(error) {
     if (error.response) {
       console.error(error.response.status, error.response.data);
@@ -76,11 +88,15 @@ function generatePrompt_1(animal) {
 }
 
 function generatePrompt_2(animal) {
-  return `In computer science, give me three related questions and answers to ${animal} in three lines in the format of:
+  return `In computer science, give me three other related questions and answers to ${animal} in three lines in the format of:
   Question 1:
   Answer:
   Question 2:
   Answer:
   Question 3:
   Answer:`;
+}
+
+function generatePrompt_4(animal) {
+  return `Please extract all the useful keywords from "${animal}"  separated.by comma`;
 }
