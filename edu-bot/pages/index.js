@@ -5,6 +5,7 @@ import styles from "./index.module.css";
 import Editor from "@monaco-editor/react";
 import Navbar from './Components/Navbar';
 import Axios from 'axios';
+import simplify from "./api/simplify";
 
 export default function Home() {
   const [animalInput, setAnimalInput] = useState("");
@@ -12,6 +13,23 @@ export default function Home() {
   const [result, setResult] = useState();
   const [userCode, setUserCode] = useState("# Enter your code here");
   const [more_q, setMore_Q] = useState();
+
+  const [group, setGroup] = useState("")
+  function detect() {
+    event.preventDefault();
+    fetch('http://localhost:8000/detect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ animal: animalInput}),
+    })
+    .then(response => response.json())
+    .then(data => {console.log(data);})
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -29,13 +47,39 @@ export default function Home() {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }
 
+      var keys = data.result_4.replace('\n','').split(', ');
+  
       var htmlRegexG = /<code>((.*?(\n)?)+)<\/code>/g;
       const code_match = data.result_1.match(htmlRegexG);
-      console.log(code_match[0]);
-      setResult(data.result_1.replaceAll(htmlRegexG,'').split(' '));
-      if (code_match!=null) {
-        setUserCode(code_match[0].replaceAll('<code>', '').replaceAll('</code>', '').replace('\n', ''));
+
+      var temp = data.result_1.replaceAll(htmlRegexG,'');
+      var i;
+      for (i=0; i<keys.length; i++) {
+        temp = temp.replaceAll(keys[i], "KEY"+i.toString());
       }
+      temp = temp.split(' ');
+      console.log(temp);
+      for (i=0; i<temp.length; i++) {
+        let index = temp[i].match(/KEY(\d+)/g);
+        if (index!=null) {
+          temp[i] = keys[Number(index[0].replaceAll('KEY',''))];
+        }
+      }
+      setResult(temp);
+
+      const codeContent = code_match[0].replaceAll('<code>', '').replaceAll('</code>', '').replace('\n', '');
+      if (code_match!=null) {
+        // fs.writeFile('code.py', data, (err) => {
+        //   if (err) {
+        //       console.error('There was an error writing the file!', err);
+        //   } else {
+        //       console.log('File written successfully!');
+        //   }
+        // });
+
+        setUserCode(codeContent);
+      }
+
       setMore_Q(data.result_2);
       setAnimalInput("");
       setKeyDef("");
@@ -78,26 +122,156 @@ export default function Home() {
   const [userOutput, setUserOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function compile() {
+  function codeCompile() {
     setLoading(true);
-
-    Axios.post(`http://localhost:8000/compile`, {
-      code: userCode,
-      language: userLang,
-      input: userInput
-    }).then((res) => {
-      setUserOutput(res.data.output);
-    }).then(() => {
-      setLoading(false);
+    fetch('http://localhost:8000/codeCompile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({code: userCode,language: userLang,input: userInput}),
     })
-
-    // Axios.get(`http://localhost:8000/language`).then((res) => {
-    //   console.log(res.data);
-    // })
+    .then(response => response.json())
+    .then(data => {console.log(data.output); setUserOutput(data.output); setLoading(false);})
+    .catch((error) => {
+      console.error('Error:', error);
+    });
   }
 
   function clearOutput() {
-    setUserOutput("");
+    setUserCode("# Enter your code here");
+  }
+
+  const [explanation, setExplanation] = useState("")
+  async function explainCode() {
+    try {
+      const response = await fetch("/api/explain", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userCode}),
+      });
+
+      const data = await response.json();
+      if (response.status !== 200) {
+        throw data.error || new Error(`Request failed with status ${response.status}`);
+      }
+      setExplanation(data.result_3);
+      setUserCode(data.result_3+'\n\n'+userCode);
+    } catch(error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+  
+  const [improve, setImprove] = useState("")
+  function improveCode() {
+    fetch('http://localhost:8000/improve', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ question: userCode}),
+    })
+    .then(response => response.json())
+    .then(data => {console.log(data);})
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
+
+
+  const [rewrite, setRewrite] = useState("")
+  async function rewriteCode() {
+    try {
+      const response = await fetch("/api/rewrite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userCode}),
+      });
+
+      const data = await response.json();
+      if (response.status !== 200) {
+        throw data.error || new Error(`Request failed with status ${response.status}`);
+      }
+      setRewrite(data.result_3);
+      setUserCode(data.result_3);
+    } catch(error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  const [simplify, setSimplify] = useState("")
+  async function simplifyCode() {
+    try {
+      const response = await fetch("/api/simplify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userCode}),
+      });
+
+      const data = await response.json();
+      if (response.status !== 200) {
+        throw data.error || new Error(`Request failed with status ${response.status}`);
+      }
+      setSimplify(data.result_3);
+      setUserCode(data.result_3);
+    } catch(error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  const [test_cases, setTestCases] = useState("")
+  async function testCases() {
+    try {
+      const response = await fetch("/api/test_cases", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userCode}),
+      });
+
+      const data = await response.json();
+      if (response.status !== 200) {
+        throw data.error || new Error(`Request failed with status ${response.status}`);
+      }
+      setTestCases(data.result_3);
+      setUserCode(userCode+'\n\n'+data.result_3);
+    } catch(error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  const [debug, setDebug] = useState("")
+  async function debugCode() {
+    try {
+      const response = await fetch("/api/debug", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userCode}),
+      });
+
+      const data = await response.json();
+      if (response.status !== 200) {
+        throw data.error || new Error(`Request failed with status ${response.status}`);
+      }
+      setDebug(data.result_3);
+      setUserCode(data.result_3);
+    } catch(error) {
+      console.error(error);
+      alert(error.message);
+    }
   }
 
   return (
@@ -110,7 +284,7 @@ export default function Home() {
       <main className={styles.main}>
         <img src="/artificial-intelligence.png" className={styles.icon} />
         <h3>Question</h3>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={(e)=>{detect(e); onSubmit(e);}}>
           <input
             type="text"
             name="animal"
@@ -120,6 +294,14 @@ export default function Home() {
           />
           <input type="submit" value="Submit" />
         </form>
+
+        {/* <div className={styles.divider}>
+          {key_words && key_words.map((q, i) => 
+            q === '' ? <p></p> :
+            <div key={i}>{q}</div>
+          )}
+        </div> */}
+
         <h3>Answer</h3>
         <div className={styles.divider}>
           {result && result.map((word, index) => 
@@ -146,7 +328,7 @@ export default function Home() {
             value={userCode}
             onChange={(value) => { setUserCode(value) }}
           />
-          <button className="run-btn" onClick={() => compile()}>
+          <button className="run-btn" onClick={() => codeCompile()}>
             Run
           </button>
         </div>
@@ -163,6 +345,29 @@ export default function Home() {
             ) : (
             <div className="output-box">
               <pre>{userOutput}</pre>
+
+              <button onClick={() => { improveCode() }} className="clear-btn">
+                Improve
+              </button>
+              <button onClick={() => { explainCode() }} className="clear-btn">
+                Explain
+              </button>
+              {/* <button onClick={() => { clearOutput() }} className="clear-btn">
+                Improve
+              </button> */}
+              <button onClick={() => { rewriteCode() }} className="clear-btn">
+                Rewrite
+              </button>
+              <button onClick={() => { simplifyCode() }} className="clear-btn">
+                Simplify
+              </button>
+              <button onClick={() => { testCases() }} className="clear-btn">
+                Test Case
+              </button>
+              <button onClick={() => { debugCode() }} className="clear-btn">
+                Debug
+              </button>
+
               <button onClick={() => { clearOutput() }} className="clear-btn">
                 Clear
               </button>
