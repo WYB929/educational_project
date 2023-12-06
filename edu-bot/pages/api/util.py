@@ -6,6 +6,7 @@ from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 from sklearn.model_selection import train_test_split
+import re
 
 def check_code_quality(file_path):
     pylint_args = [
@@ -14,8 +15,23 @@ def check_code_quality(file_path):
         file_path
     ]
     result = subprocess.run(pylint_args, capture_output=True, text=True)
-    # print(str(result.stdout))
-    return result.stdout
+    result = str(result.stdout)
+    score_match = re.search(r'rated at ([-\d\.]+)/10', result)
+    if score_match:
+        score = score_match.group(1)
+        print("Pylint score:", score)
+    else:
+        print("Score not found")
+
+    # Extracting error messages
+    errors = []
+    for line in result.split('\n'):
+        match = re.search(r':(\d+:\d+: \w+: .+)', line.strip())
+        if match:
+            errors.append(match.group(1))
+    for error in errors:
+        print(error)
+    return {"score": score, "errors": errors}
 
 ## Question Classification
 df = pd.read_csv("../../public/questions_labels.csv")

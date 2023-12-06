@@ -1,14 +1,16 @@
-from flask import Flask, request, jsonify
 import requests
+# import os
+# import openai
+from flask import Flask, request, jsonify, redirect, render_template, url_for
 from flask_cors import CORS, cross_origin
 from util import check_code_quality, predict_question
 
 app = Flask(__name__)
+# openai.api_key = os.getenv("OPENAI_API_KEY")
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 @app.route('/codeCompile', methods=['POST'])
-@cross_origin()
 def compile_code():
     data = request.json
 
@@ -31,7 +33,6 @@ def compile_code():
     return jsonify(response.json())
 
 @app.route('/improve', methods=['POST'])
-@cross_origin()
 def improve_code():
     code = request.json['question']
     filename = "../../public/code.py"
@@ -39,15 +40,38 @@ def improve_code():
         f.write(code)
     
     result = check_code_quality(filename)
-    print(result)
-    return jsonify({'data': 'hello'})
+    return jsonify(result)
 
 
 @app.route('/detect', methods=['POST'])
-@cross_origin()
 def detect():
     label = predict_question(request.json['animal'])
     return jsonify({'label': label})
+
+# @app.route("/rewrite",methods=['POST'])
+# def rewrite():
+#     code = request.json['question']
+#     response = openai.Completion.create(
+#         model="gpt-3.5-turbo-instruct",
+#         prompt=generate_prompt(question),
+#         temperature=0.6,
+#         max_tokens=2000,
+#     )
+#     print(code)
+#     return jsonify({'data': 'hello'})
+#     # if request.method == "POST":
+#     #     question = request.json["question"]
+#     #     response = openai.Completion.create(
+#     #         model="gpt-3.5-turbo-instruct",
+#     #         prompt=generate_prompt(question),
+#     #         temperature=0.6,
+#     #         max_tokens=2000,
+#     #     )
+#     #     print(question)
+
+
+# def generate_prompt(question):
+#     return """return `In Computer Science, {}?`""".format(question)
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
