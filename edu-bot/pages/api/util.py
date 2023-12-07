@@ -11,7 +11,7 @@ import re
 def check_code_quality(file_path):
     pylint_args = [
         'pylint',
-        '--disable=E0401, C0114, C0304',  # Disable import-error check
+        '--disable=E0401, C0114, C0115, C0304',  # Disable import-error check
         file_path
     ]
     result = subprocess.run(pylint_args, capture_output=True, text=True)
@@ -33,6 +33,15 @@ def check_code_quality(file_path):
     for error in errors:
         print(error)
     return {"score": score, "errors": errors}
+
+def run_python_file(file_path):
+    try:
+        result = subprocess.run(['python3', file_path], capture_output=True, text=True, check=True)
+        print(result)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        # Handle the case where the Python script failed to run
+        return f"An error occurred: {e.stderr}"
 
 ## Question Classification
 df = pd.read_csv("../../public/questions_labels.csv")

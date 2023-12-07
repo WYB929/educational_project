@@ -112,7 +112,7 @@ export default function Home() {
       body: JSON.stringify({code: userCode,language: userLang,input: userInput}),
     })
     .then(response => response.json())
-    .then(data => {console.log(data.output); setUserOutput(data.output); setLoading(false);})
+    .then(data => {console.log(data); setUserOutput(data); setLoading(false);})
     .catch((error) => {
       console.error('Error:', error);
     });
@@ -308,7 +308,7 @@ export default function Home() {
         <Navbar userLang={userLang} setUserLang={setUserLang}/>
         <div className="left-container">
           <Editor
-            height="200px"
+            height="1000px"
             width="100%"
             language={userLang}
             defaultLanguage="python"

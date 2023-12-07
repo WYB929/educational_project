@@ -3,7 +3,7 @@ import requests
 # import openai
 from flask import Flask, request, jsonify, redirect, render_template, url_for
 from flask_cors import CORS, cross_origin
-from util import check_code_quality, predict_question
+from util import check_code_quality, predict_question, run_python_file
 
 app = Flask(__name__)
 # openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -12,25 +12,33 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 @app.route('/codeCompile', methods=['POST'])
 def compile_code():
+    # data = request.json
+
+    # url = "https://online-code-compiler.p.rapidapi.com/v1/"
+
+    # payload = {
+    #     "language": "python3",
+    #     "version": "latest",
+    #     "code": data['code'],
+    #     "input": data['input']
+    # }
+    # headers = {
+    #     "content-type": "application/json",
+    #     "X-RapidAPI-Key": "b0cd7629eemsh0956c482376c675p1b1de6jsn36234a14c31d",
+    #     "X-RapidAPI-Host": "online-code-compiler.p.rapidapi.com"
+    # }
+
+    # response = requests.post(url, json=payload, headers=headers)
+
+    # return jsonify(response.json())
     data = request.json
-
-    url = "https://online-code-compiler.p.rapidapi.com/v1/"
-
-    payload = {
-        "language": "python3",
-        "version": "latest",
-        "code": data['code'],
-        "input": data['input']
-    }
-    headers = {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "b0cd7629eemsh0956c482376c675p1b1de6jsn36234a14c31d",
-        "X-RapidAPI-Host": "online-code-compiler.p.rapidapi.com"
-    }
-
-    response = requests.post(url, json=payload, headers=headers)
-
-    return jsonify(response.json())
+    code = data['code']
+    filename = "../../public/code.py"
+    with open(filename, "w") as f:
+        f.write(code)
+    result = run_python_file(filename)
+    print(result)
+    return jsonify(result)
 
 @app.route('/improve', methods=['POST'])
 def improve_code():
