@@ -17,6 +17,7 @@ def check_code_quality(file_path):
     result = subprocess.run(pylint_args, capture_output=True, text=True)
     result = str(result.stdout)
     score_match = re.search(r'rated at ([-\d\.]+)/10', result)
+    score = None
     if score_match:
         score = score_match.group(1)
         print("Pylint score:", score)

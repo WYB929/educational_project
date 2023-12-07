@@ -15,17 +15,18 @@ export default async function (req, res) {
     return;
   }
   const question = req.body.question || '';
+  const errors = req.body.errors || 'None';
 
   try {
-    const completion_3 = await openai.createCompletion({
+    let completion_3 = await openai.createCompletion({
       model: "gpt-3.5-turbo-instruct",
-      prompt: generatePrompt(question),
+      prompt: generatePrompt(question, errors),
       temperature: 0.6,
-      max_tokens: 100,
+      max_tokens: 2000,
     });
-    console.log("rewrite");
+    console.log(errors);
+    console.log("explain");
     console.log(completion_3.data);
-    
     res.status(200).json({result_3: completion_3.data.choices[0].text});
   } catch(error) {
     if (error.response) {
@@ -42,9 +43,11 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(code) {
-    return `Rewrite this code following Python conventions.
-    \`\`\`
-    ${code}
-    \`\`\``;
+function generatePrompt(code, errors) {
+  return `
+  <code>
+  ${code}
+  </code>
+  has linter error: ${errors}
+  Revising code based on the error and only return revised code enclosed in <code></code>.`;
 }

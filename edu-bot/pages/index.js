@@ -57,7 +57,7 @@ export default function Home() {
       else {
         const codeContent = data.result_1.replaceAll('<code>', '').replaceAll('</code>', '').replace('\n', '');
         console.log(codeContent);
-        setResult("");
+        // setResult("");
         setUserCode(codeContent);
       }
       setMore_Q(data.result_2);
@@ -145,7 +145,8 @@ export default function Home() {
     }
   }
   
-  const [improve, setImprove] = useState("")
+  const [score, setScore] = useState(10)
+  const [errors, setError] = useState([])
   function improveCode() {
     fetch('http://localhost:8000/improve', {
       method: 'POST',
@@ -155,7 +156,10 @@ export default function Home() {
       body: JSON.stringify({ question: userCode}),
     })
     .then(response => response.json())
-    .then(data => {console.log(data);})
+    .then(data => {
+      console.log(data); 
+      setScore(data.score); 
+      setError(data.errors);})
     .catch((error) => {
       console.error('Error:', error);
     });
@@ -163,27 +167,28 @@ export default function Home() {
 
 
   const [rewrite, setRewrite] = useState("")
-  async function rewriteCode() {
+  async function rewriteCode(e) {
     try {
+      e.target.style.color = 'red';
       const response = await fetch("/api/rewrite", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question: userCode}),
+        body: JSON.stringify({ errors: e.target.innerText, question: userCode}),
       });
 
       const data = await response.json();
       if (response.status !== 200) {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }
-      setRewrite(data.result_3);
-      setUserCode(data.result_3);
+      setUserCode(data.result_3.replaceAll('<code>', '').replaceAll('</code>', ''));
     } catch(error) {
       console.error(error);
       alert(error.message);
     }
   }
+
 
   const [simplify, setSimplify] = useState("")
   async function simplifyCode() {
@@ -285,7 +290,9 @@ export default function Home() {
         <h3>Answer</h3>
         <div className={styles.divider}>
           {result && result.map((word, index) => 
-            <strong key={index} onMouseOutCapture={mouseOut} onClick={click}>{word+' '}</strong>
+            <strong key={index} onMouseOutCapture={(e) => mouseOut(e)} onClick={(e) => click(e)}>
+              {word+' '}
+            </strong>
           )}
           <div><br></br>{keyClick}</div>
         </div>
@@ -317,6 +324,14 @@ export default function Home() {
           <div className="input-box">
             <textarea id="code-inp" onChange={(e)=>setUserInput(e.target.value)}></textarea>
           </div>
+          <h4>Linter Check:</h4>
+          <div>
+            {errors && errors.map((error, index) => 
+              <div key={index} onMouseOutCapture={(e)=>mouseOut(e)} onClick={(e)=>rewriteCode(e)}>
+                Line {error}
+              </div>
+            )}
+          </div>
           <h4>Output:</h4>
           {loading ? (
             <div className="spinner-box">
@@ -327,18 +342,18 @@ export default function Home() {
               <pre>{userOutput}</pre>
 
               <button onClick={() => { improveCode() }} className="clear-btn">
-                Improve
+                Check
               </button>
-              <button onClick={() => { explainCode() }} className="clear-btn">
+              {/* <button onClick={() => { explainCode() }} className="clear-btn">
                 Explain
-              </button>
+              </button> */}
               {/* <button onClick={() => { clearOutput() }} className="clear-btn">
                 Improve
               </button> */}
-              <button onClick={() => { rewriteCode() }} className="clear-btn">
+              {/* <button onClick={() => { rewriteCode() }} className="clear-btn">
                 Rewrite
-              </button>
-              <button onClick={() => { simplifyCode() }} className="clear-btn">
+              </button> */}
+              {/* <button onClick={() => { simplifyCode() }} className="clear-btn">
                 Simplify
               </button>
               <button onClick={() => { testCases() }} className="clear-btn">
@@ -350,7 +365,7 @@ export default function Home() {
 
               <button onClick={() => { clearOutput() }} className="clear-btn">
                 Clear
-              </button>
+              </button> */}
             </div>
           )}
         </div>
