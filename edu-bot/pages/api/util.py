@@ -15,7 +15,7 @@ work_dir = '/Users/wangyibin/Desktop/NYU/Fall_2023/CS2630_mobile_system/educatio
 def check_code_quality(file_path):
     pylint_args = [
         'pylint',
-        '--disable=E0401, C0114, C0115, C0304',  # Disable import-error check
+        '--disable=E0401, C0103, C0114, C0115, C0116, C0209, C0301, C0303, C0304, R0402, ',  # Disable import-error check
         file_path
     ]
     result = subprocess.run(pylint_args, capture_output=True, text=True)
