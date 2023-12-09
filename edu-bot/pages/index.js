@@ -102,6 +102,7 @@ export default function Home() {
   const [userOutput, setUserOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [upload_message, setUploadMessage] = useState("");
+  const [code_question, setCodeQuestion] = useState('');
 
   function codeCompile() {
     setLoading(true);
@@ -258,6 +259,29 @@ export default function Home() {
     }
   }
 
+  async function codeQuestionForm(event) {
+    event.preventDefault();
+    try {
+      const response = await fetch("/api/code_question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code_question: code_question, code: userCode}),
+      });
+
+      const data = await response.json();
+      if (response.status !== 200) {
+        throw data.error || new Error(`Request failed with status ${response.status}`);
+      }
+      setUserCode(data.result);
+      console.log(data.result);
+    }
+    catch(error) {
+      console.error('Error:', error);
+    }
+  }
+
   const [debug, setDebug] = useState("")
   async function debugCode() {
     try {
@@ -351,10 +375,10 @@ export default function Home() {
         </div>
 
         <div className="right-container">
-          <h4>Input:</h4>
+          {/* <h4>Input:</h4>
           <div className="input-box">
             <textarea id="code-inp" onChange={(e)=>setUserInput(e.target.value)}></textarea>
-          </div>
+          </div> */}
           <h4>Linter Check:</h4>
           <div>
             {errors && errors.map((error, index) => 
@@ -363,6 +387,18 @@ export default function Home() {
               </div>
             )}
           </div>
+          <h4>What to improve this code as your wish? Enter your request below:</h4>
+          <form onSubmit={codeQuestionForm}>
+            <input 
+              type="text" 
+              name="code_question" 
+              placeholder="Enter your request to change the code here" 
+              value={code_question} 
+              onChange={(e) => setCodeQuestion(e.target.value)} 
+            />
+            <input type="submit" value="Submit" />
+          </form>
+
           <h4>Output:</h4>
           {loading ? (
             <div className="spinner-box">
