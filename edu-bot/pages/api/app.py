@@ -1,7 +1,8 @@
 import requests
-# import os
+import os
 # import openai
 from flask import Flask, request, jsonify, redirect, render_template, url_for
+from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 from util import check_code_quality, predict_question, run_python_file
 
@@ -9,6 +10,13 @@ app = Flask(__name__)
 # openai.api_key = os.getenv("OPENAI_API_KEY")
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+# Path to the file_buffer directory
+current_dir = os.path.dirname(__file__)
+UPLOAD_FOLDER = os.path.join(current_dir, '../../file_buffer')
+
+# Ensure UPLOAD_FOLDER exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/codeCompile', methods=['POST'])
 def compile_code():
@@ -55,6 +63,19 @@ def improve_code():
 def detect():
     label = predict_question(request.json['animal'])
     return jsonify({'label': label})
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file:
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+    return jsonify({'message': 'File uploaded successfully', 'filename': filename, 'file_path': file_path})
 
 # @app.route("/rewrite",methods=['POST'])
 # def rewrite():

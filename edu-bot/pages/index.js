@@ -236,6 +236,24 @@ export default function Home() {
     }
   }
 
+  async function handleFileUpload(event) {
+    event.preventDefault();
+    const formData = new FormData();
+    const fileInput = document.querySelector('input[type="file"]');
+    formData.append("file", fileInput.files[0]);
+
+    try {
+      const response = await fetch('http://localhost:8000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      console.log(data.message);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
   const [debug, setDebug] = useState("")
   async function debugCode() {
     try {
@@ -319,6 +337,12 @@ export default function Home() {
             Run
           </button>
         </div>
+
+        <form onSubmit={handleFileUpload}>
+          <input type="file" name="myFile" />
+          <button type="submit">Upload</button>
+        </form>
+
         <div className="right-container">
           <h4>Input:</h4>
           <div className="input-box">
