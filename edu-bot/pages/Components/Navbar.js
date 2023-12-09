@@ -8,7 +8,7 @@ const Navbar = ({ userLang, setUserLang}) => {
     ];
 
     return (
-        <div className="navbar">
+        <div className="navbar" style={{width:"80%"}}>
             <h1>Code Compiler</h1>
             <Select options={languages} value={userLang} onChange={(e)=>setUserLang(e.value)} placeholder={userLang}/>
         </div>

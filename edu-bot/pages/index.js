@@ -149,6 +149,7 @@ export default function Home() {
   
   const [score, setScore] = useState(10)
   const [errors, setError] = useState([])
+  const [check, setCheck] = useState(false)
   function improveCode() {
     fetch('http://localhost:8000/improve', {
       method: 'POST',
@@ -161,7 +162,8 @@ export default function Home() {
     .then(data => {
       console.log(data); 
       setScore(data.score); 
-      setError(data.errors);})
+      setError(data.errors);
+      setCheck(true);})
     .catch((error) => {
       console.error('Error:', error);
     });
@@ -355,7 +357,7 @@ export default function Home() {
         <div className="left-container">
           <Editor
             height="1000px"
-            width="100%"
+            width="80%"
             language={userLang}
             defaultLanguage="python"
             value={userCode}
@@ -381,11 +383,20 @@ export default function Home() {
           </div> */}
           <h4>Linter Check:</h4>
           <div>
-            {errors && errors.map((error, index) => 
+            {errors.length>0 && errors.map((error, index) => 
               <div key={index} onMouseOutCapture={(e)=>mouseOut(e)} onClick={(e)=>rewriteCode(e)}>
                 Line {error}
               </div>
             )}
+            {(errors.length===0 && check) && 
+              <div>
+                Pass Linter Check!
+              </div>
+            }
+            {(errors.length===0 && !check) && 
+              <div>
+              </div>
+            }
           </div>
           <h4>What to improve this code as your wish? Enter your request below:</h4>
           <form onSubmit={codeQuestionForm}>
