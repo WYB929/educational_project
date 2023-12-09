@@ -95,7 +95,7 @@ function generatePrompt_1(animal, group) {
 }
 
 function generatePrompt_2(animal) {
-  return `In computer science, give me three other related questions and answers to ${animal} in three lines in the format of:
+  return `In computer science, give me three other related questions and their answers according to question ${animal} in the format of:
   Question 1:
   Answer:
   Question 2:
@@ -105,5 +105,5 @@ function generatePrompt_2(animal) {
 }
 
 function generatePrompt_4(animal) {
-  return `Please extract all the useful keywords from "${animal}"  separated.by comma`;
+  return `Please extract all the useful keywords related to computer science from "${animal}"  separated by comma`;
 }

@@ -48,6 +48,6 @@ function generatePrompt(code, errors) {
   <code>
   ${code}
   </code>
-  has linter error: ${errors}
-  Revising code based on the error and only return revised code enclosed in <code></code>.`;
+  has linter error: ${errors}. 
+  Revise code based on the linter error above and only return revised code enclosed in <code></code>.`;
 }

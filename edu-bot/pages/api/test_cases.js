@@ -44,7 +44,7 @@ export default async function (req, res) {
 }
 
 function generatePrompt(code) {
-    return `Write a few lines of python assert test code for the following function, show code only.
+    return `Write a few lines of python assert test code for the following code below, show code only.
     \`\`\`
     ${code}
     \`\`\``;

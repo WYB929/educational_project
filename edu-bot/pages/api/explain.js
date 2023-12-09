@@ -46,5 +46,7 @@ function generatePrompt(code) {
   return `Write explanation for the following code as python comments.
   \`\`\`
   ${code}
-  \`\`\``;
+  \`\`\`
+  Please do not include \`\`\` in your answer.
+  `;
 }

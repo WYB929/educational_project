@@ -43,7 +43,7 @@ export default async function (req, res) {
 }
 
 function generatePrompt(code) {
-    return `Simple the following code as much as possible.
+    return `Simplify the following code below as much as possible and just return the simplified code.
     \`\`\`
     ${code}
     \`\`\``;
