@@ -7,6 +7,10 @@ from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 from sklearn.model_selection import train_test_split
 import re
+import os
+
+conda_env_path = '/opt/anaconda3/envs/edu_bot'
+work_dir = '/Users/wangyibin/Desktop/NYU/Fall_2023/CS2630_mobile_system/educational_project/edu-bot/public'
 
 def check_code_quality(file_path):
     pylint_args = [
@@ -36,7 +40,9 @@ def check_code_quality(file_path):
 
 def run_python_file(file_path):
     try:
-        result = subprocess.run(['python3', file_path], capture_output=True, text=True, check=True)
+        env = os.environ.copy()
+        env['PATH'] = f"{conda_env_path}/bin:" + env['PATH']
+        result = subprocess.run(['python3', file_path], capture_output=True, text=True, check=True, cwd=work_dir, env=env)
         print(result)
         return result.stdout
     except subprocess.CalledProcessError as e:
