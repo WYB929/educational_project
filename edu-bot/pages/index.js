@@ -101,6 +101,7 @@ export default function Home() {
   const [userInput, setUserInput] = useState("");
   const [userOutput, setUserOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [upload_message, setUploadMessage] = useState("");
 
   function codeCompile() {
     setLoading(true);
@@ -248,9 +249,12 @@ export default function Home() {
         body: formData,
       });
       const data = await response.json();
-      console.log(data.message);
+      console.log(data);
+      const message = data.message + "! And you can retrive your file in code editer with path: " + data.retrive_path;
+      setUploadMessage(message);
     } catch (error) {
       console.error('Error:', error);
+      setUploadMessage(error);
     }
   }
 
@@ -338,10 +342,13 @@ export default function Home() {
           </button>
         </div>
 
-        <form onSubmit={handleFileUpload}>
-          <input type="file" name="myFile" />
-          <button type="submit">Upload</button>
-        </form>
+        <div>
+          <form onSubmit={handleFileUpload}>
+            <input type="file" name="myFile" />
+            <button type="submit">Upload</button>
+          </form>
+          <div>{upload_message}</div>
+        </div>
 
         <div className="right-container">
           <h4>Input:</h4>
