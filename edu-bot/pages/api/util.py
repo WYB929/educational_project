@@ -10,7 +10,7 @@ import re
 import os
 
 conda_env_path = '/opt/anaconda3/envs/edu_bot'
-work_dir = '/Users/wangyibin/Desktop/NYU/Fall_2023/CS2630_mobile_system/educational_project/edu-bot/public'
+work_dir = '/Users/wangyibin/Desktop/NYU/Fall_2023/CS2630_mobile_system/educational_project/edu-bot/file_buffer'
 
 def check_code_quality(file_path):
     pylint_args = [

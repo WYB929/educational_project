@@ -41,10 +41,10 @@ def compile_code():
     # return jsonify(response.json())
     data = request.json
     code = data['code']
-    filename = "../../public/code.py"
+    filename = "../../file_buffer/code.py"
     with open(filename, "w") as f:
         f.write(code)
-    filename = "../../public/code.py"
+    filename = "../../file_buffer/code.py"
     base_name = os.path.basename(filename)
     result = run_python_file(base_name)
     print(result)
@@ -53,7 +53,7 @@ def compile_code():
 @app.route('/improve', methods=['POST'])
 def improve_code():
     code = request.json['question']
-    filename = "../../public/code.py"
+    filename = "../../file_buffer/code.py"
     with open(filename, "w") as f:
         f.write(code)
     
@@ -76,7 +76,7 @@ def upload():
     if file:
         filename = secure_filename(file.filename)
         file_path = os.path.join(UPLOAD_FOLDER, filename)
-        retrive_path = '../file_buffer/' + filename
+        retrive_path = filename
         file.save(file_path)
     return jsonify({'message': 'File uploaded successfully', 'filename': filename, 'file_path': file_path, 'retrive_path':retrive_path})
 
