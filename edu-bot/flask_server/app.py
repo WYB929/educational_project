@@ -13,7 +13,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Path to the file_buffer directory
 current_dir = os.path.dirname(__file__)
-UPLOAD_FOLDER = os.path.join(current_dir, '../../file_buffer')
+UPLOAD_FOLDER = os.path.join(current_dir, '../file_buffer')
 
 # Ensure UPLOAD_FOLDER exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -41,10 +41,10 @@ def compile_code():
     # return jsonify(response.json())
     data = request.json
     code = data['code']
-    filename = "../../file_buffer/code.py"
+    filename = "../file_buffer/code.py"
     with open(filename, "w") as f:
         f.write(code)
-    filename = "../../file_buffer/code.py"
+    filename = "../file_buffer/code.py"
     base_name = os.path.basename(filename)
     result = run_python_file(base_name)
     print(result)
@@ -53,7 +53,7 @@ def compile_code():
 @app.route('/improve', methods=['POST'])
 def improve_code():
     code = request.json['question']
-    filename = "../../file_buffer/code.py"
+    filename = "../file_buffer/code.py"
     with open(filename, "w") as f:
         f.write(code)
     

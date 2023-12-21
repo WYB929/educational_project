@@ -10,6 +10,7 @@ import re
 import os
 
 conda_env_path = '/opt/anaconda3/envs/edu_bot'
+# replace with your own path to file_buffer (should create folder named edu-bot)
 work_dir = '/Users/wangyibin/Desktop/NYU/Fall_2023/CS2630_mobile_system/educational_project/edu-bot/file_buffer'
 
 def check_code_quality(file_path):
@@ -50,7 +51,7 @@ def run_python_file(file_path):
         return f"An error occurred: {e.stderr}"
 
 ## Question Classification
-df = pd.read_csv("../../public/questions_labels.csv")
+df = pd.read_csv("../public/questions_labels.csv")
 train_df, temp_df = train_test_split(df, test_size=0.2, random_state=42)
 val_df, test_df = train_test_split(temp_df, test_size=0.5, random_state=42)
 
@@ -76,7 +77,7 @@ class TextClassifier(nn.Module):
         out = self.fc(hidden[-1])
         return out
 model = TextClassifier(len(vocab), embed_dim=100, hidden_dim=128, num_classes=2)
-model.load_state_dict(torch.load("../../public/question_classifier_state_dict.pth", map_location=torch.device('cpu')))
+model.load_state_dict(torch.load("../public/question_classifier_state_dict.pth", map_location=torch.device('cpu')))
 
 def predict_question(question):
     model.eval()
